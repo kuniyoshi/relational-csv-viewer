@@ -3,21 +3,46 @@ use std::error::Error;
 use std::fs::File;
 
 #[derive(Debug, serde::Deserialize)]
-struct Record {
+struct CharacterRecord {
     id: usize,
     name: String,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let file_path = "sample.csv";
-    let file = File::open(file_path)?;
-    let mut rdr = Reader::from_reader(file);
+#[derive(Debug, serde::Deserialize)]
+struct SkillRecord {
+    id: usize,
+    character_id: usize,
+    name: String,
+    detail_id: usize,
+}
 
-    for result in rdr.deserialize() {
-        let record: Record = result?;
-        println!("(id, name): ({}, {})", record.id, record.name);
-        println!("{:?}", record);
+#[derive(Debug, serde::Deserialize)]
+struct DetailRecord {
+    id: usize,
+    description: String,
+}
+
+struct Database {
+    characters: Vec<CharacterRecord>,
+    skills: Vec<SkillRecord>,
+    details: Vec<DetailRecord>,
+}
+
+fn read_characters(file_path: &str) -> Result<Vec<CharacterRecord>, Box<dyn Error>> {
+    let file = File::open(file_path)?;
+    let mut reader = Reader::from_reader(file);
+    let mut result= Vec::new();
+
+    for read in reader.deserialize() {
+        let record: CharacterRecord = read?;
+        result.push(record);
     }
 
+    Ok(result)
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let characters = read_characters("data/characters.csv");
+    eprintln!("{:?}", characters);
     Ok(())
 }
