@@ -56,5 +56,30 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     eprintln!("{:?}", database);
 
+    describe(&database, "モモ");
+
     Ok(())
+}
+
+fn describe(database: &Database, name: &str) {
+    let character = match database.characters.iter().find(|c| c.name == name) {
+        Some(c) => c,
+        None => return,
+    };
+
+    let skill = match database
+        .skills
+        .iter()
+        .find(|s| s.character_id == character.id)
+    {
+        Some(s) => s,
+        None => return,
+    };
+
+    let detail = match database.details.iter().find(|d| d.id == skill.detail_id) {
+        Some(d) => d,
+        None => return,
+    };
+
+    println!("{} {} {}", character.name, skill.name, detail.description);
 }
